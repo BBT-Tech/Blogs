@@ -125,31 +125,27 @@ return josn_encode($arr);
 		/* Connect to a MySQL server  连接数据库服务器 */
 		$conn = mysqli_connect(
 		    'localhost',  /* The host to connect to 连接MySQL地址 */
-			'root',      /* The user to connect as 连接MySQL用户名 */
-			'',  /* The password to use 连接MySQL密码 */
+			'root',       /* The user to connect as 连接MySQL用户名 */
+			'', 		  /* The password to use 连接MySQL密码 */
 			'dbname');    /* The default database to query 连接数据库名称*/
 
 		if (!$conn) {
 		    printf("Can't connect to MySQL Server. Errorcode: %s ", mysqli_connect_error()); // echo出来也行
 			exit;
-		}else
+		}else{
 		    echo '数据库连接上了！'. "<br/>";
 			//执行mysql语句
 			if ($result = mysqli_query($conn, 'SELECT id,class,scores  FROM jian_scores WHERE scores>60 ')) {
-
-			echo('id  班级 分数 '). "<br/>";
-
-			/* Fetch the results of the query 返回查询的结果 */
-			while( $row = mysqli_fetch_assoc($result)  ){
-			    echo  $row['id'], "&nbsp;", $row['class'], "&nbsp;",  $row['scores'], "<br/>";
-				   // printf("%s (%s) ",  $row['id'],$row['class'], $row['scores']);
-
+				echo('id  班级 分数 '). "<br/>";
+				/* Fetch the results of the query 返回查询的结果 */
+				while( $row = mysqli_fetch_assoc($result)  ){
+				    echo  $row['id'], "&nbsp;", $row['class'], "&nbsp;",  $row['scores'], "<br/>";
+					 // printf("%s (%s) ",  $row['id'],$row['class'], $row['scores']);
+				}
+				/* Destroy the result set and free the memory used for it 结束查询释放内存 */
+				mysqli_free_result($result);
 			}
-
-			/* Destroy the result set and free the memory used for it 结束查询释放内存 */
-			mysqli_free_result($result);
-
-			}
+		}
 
 
 			/* Close the connection 关闭连接*/
