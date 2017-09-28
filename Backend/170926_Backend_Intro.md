@@ -124,7 +124,7 @@ return josn_encode($arr);
 
 		/* Connect to a MySQL server  连接数据库服务器 */
 		$conn = mysqli_connect(
-		    'localhost',  /* The host to connect to 连接MySQL地址 */
+			'localhost',  /* The host to connect to 连接MySQL地址 */
 			'root',       /* The user to connect as 连接MySQL用户名 */
 			'', 		  /* The password to use 连接MySQL密码 */
 			'dbname');    /* The default database to query 连接数据库名称*/
