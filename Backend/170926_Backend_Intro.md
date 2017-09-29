@@ -1,4 +1,6 @@
 # PHP入门简介 #
+Author:陈泽锋
+
 ## 一、访问网页流程简述 ##
 ### 1.基本概念 ###
 * 服务器： 可以看做是一台在运行的电脑（永久保持开机），通过搭建环境（安装软件）来达到用户能够访问该电脑，并为用户提供**服务**（网页，下载文件，上传文件),由于图形界面占用电脑很多资源，所以为了性能，一般是采用命令行界面操作 Ps：服务器服务器，就是给他人提供服务的机器
@@ -35,20 +37,20 @@ ps:个人对php后台看法：数据包/请求传来->  接受参数 -> 验证�
 * 获取参数
 
 一般来说，前端比较常用的请求方式有２种，get 和　post ,而php可以直接获取这些请求方式的变量,可以在[php超全局变量](http://www.w3school.com.cn/php/php_superglobals.asp)学习
-```````
+```php
 //demo
 <?php 
 // post
 if(isset($_POST["username"])){
-	if($_POST["username"] == "")
-		echo "用户名不准为空";
-	else{
-		....
-		....
-     }
- }else{
- echo "POST请求没有传入username变量"
- }
+    if($_POST["username"] == "")
+        echo "用户名不准为空";
+    else{
+        ....
+        ....
+    }
+}else{
+    echo "POST请求没有传入username变量"
+}
 // get 
 if(isset($_GET["username"])){
 	......
@@ -60,7 +62,7 @@ if(isset($_GET["username"])){
 //打印数组参数
 print_r($_POST); // 打印POST数组
 var_dump($_POST);  // 打印出POST数组
-```````
+```
 
 * 验证参数
 
@@ -75,7 +77,7 @@ var_dump($_POST);  // 打印出POST数组
 ps：echo是输出字符串到浏览器，return是终止后面代码的执行并返回一个值，所以在实际传送数据时都是return，php和web服务器会自动帮你respond包，echo更多是在测试时候方便调试
 
 
-```````
+```php
 <?php
 //  一系列操作
 $arr = [];  // $arr = array();写法也可以，不过比较长
@@ -86,15 +88,15 @@ $arr["sex"] = "男";
 //var_dump($arr); 用于调试，直接输出数组内容到浏览器
 return josn_encode($arr);
 
-```````
+```
 
 * 问题：
 
-	* 上面我们说过了，很多人访问同一个网页，web服务器（apace，nginx等）会自动帮你新开一个线程，那么服务器是如何在众多线程中识别不同用户操作呢？
+	* 上面我们说过了，很多人访问同一个网页，web服务器（apache，nginx等）会自动帮你新开一个线程，那么服务器是如何在众多线程中识别不同用户操作呢？
 		答:服务器对新来的请求开一个线程（或者说session，也叫会话），会生成一个sessionId，这个sessionId会随数据包发送到你的浏览器，你的浏览器会保存起来，当每次访问这个网站的任何网页时，浏览器都会自动的帮你把sessionId发出去，服务器根据这个id找到属于你的线程
 	* http协议是无状态协议，不会记录你的所有操作，就像你每次运行c++程序一样，下一次的运行并不会读取上一次你设置的变量的值，那么，当我登录后，一直的操作，服务端是如何一直记录我的信息呢
 	答：php有个全局变量$_SESSION, 通过设置这个全局变量，服务端可以每一次都读取，改变这个变量，并影响下一次请求（这里有个注意，sessionId是用来识别线程，而$_SESSION变量是服务器分配到该线程后起作用的。举个例子
-	```
+	```php
 	<?php
 	session_start();  // 必须，告诉服务器你想启动session
 	$_SESSION["username"] = $_POST["name"];  // 将post请求中的name变量内容设置为SESSION
@@ -128,7 +130,7 @@ return josn_encode($arr);
 
 	直接用图形化界面phpmyadmin，用超级管理员root登录（默认没有密码，记得去修改），建立一个库，建立表，完成字段，在这里，有一个需要注意，数据库的编码，统一采用utf8(utf8_general_ci),这是一个大坑，字符的不同会导致乱码
 	* php操作数据库
-		```
+		```php
 		<?php
 
 		/* Connect to a MySQL server  连接数据库服务器 */
