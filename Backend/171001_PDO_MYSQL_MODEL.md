@@ -1,10 +1,13 @@
-# PDO_MYSQL_MODEL 文档
+# PDO_MYSQL_MODEL 文档（代码见附录）
 
 **Author**:黄飞勤
 
-**个人封装的PDO操作MySQL的Model类，代码（见附录）仅供参考，欢迎指出BUG**
+注：**个人封装的PDO操作MySQL的Model类，代码（见附录）仅供学习和参考，欢迎指出BUG**
 
 ---
+
+## 使用前提
+熟悉PHP语法，用过ThinkPHP3.x
 
 ## 更新注记
 ### 2017.9.23更新
