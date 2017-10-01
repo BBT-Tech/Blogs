@@ -1,10 +1,10 @@
-# PDO_MYSQL_MODEL 文档（代码见附录）
+# PDO_MYSQL_MODEL（代码见附录）
 
 **Author**:黄飞勤
 
-注：**个人封装的PDO操作MySQL的Model类，代码（见附录）仅供学习和参考，欢迎指出BUG**
-
 ---
+
+注：**个人封装的PDO操作MySQL的Model类，代码仅供学习和参考，欢迎指出BUG**
 
 ## 使用前提
 熟悉PHP语法，用过ThinkPHP3.x
@@ -36,15 +36,15 @@ $link = M("users",$dbConfig);
 ```
 **推荐使用配置文件的方法**，支持的配置信息：
 ```
-define("DB_HOST",'127.0.0.1');   //服务器地址
-define("DB_USER",'root');        //用户名
-define('DB_PWD','root');         //密码
-define('DB_NAME','chat');        //数据库名
-define('DB_PORT','3306');        //端口号
-define('DB_TYPE','mysql');       //数据库类型
-define('DB_CHARSET','utf8');     //编码格式
-define('DB_DEBUG',true);         //是否开启DEBUG模式，系统上线关闭DEBUG模式
-define('MYSQL_LOG','/mysql.log');//定义mysql的log文件路径，请先确保有读权限
+define("DB_HOST",'127.0.0.1');     //服务器地址
+define("DB_USER",'root');          //用户名
+define('DB_PWD','root');           //密码
+define('DB_NAME','chat');          //数据库名
+define('DB_PORT','3306');          //端口号
+define('DB_TYPE','mysql');         //数据库类型
+define('DB_CHARSET','utf8');       //编码格式
+define('DB_DEBUG',true);           //是否开启DEBUG模式，系统上线关闭DEBUG模式
+//define('MYSQL_LOG','/mysql.log');//定义mysql的log文件路径，请先确保有读权限(此定义默认不开启)
 ```
 其中，要定义`MYSQL_LOG`，请先开启mysql的通用查询日志（general_log），开启后才能使用getLastLog()函数，而且这会消耗mysql很大的性能，**这一项仅仅为了debug**。
 >只有general_log才是记录所有的操作日志,不过会耗费数据库5%-10%的性能,所以一般没什么特别需要,大多数情况是不开的。
