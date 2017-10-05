@@ -1,0 +1,11 @@
+<?php 
+//数据库配置信息
+define("DB_HOST",'127.0.0.1');
+define("DB_USER",'root');
+define('DB_PWD','root');
+define('DB_NAME','db_name');
+define('DB_PORT','3306');
+define('DB_TYPE','mysql');
+define('DB_CHARSET','utf8');
+define('DB_DEBUG',true);//是否开启DEBUG模式，请在系统上线后关闭DEBUG模式
+//define('MYSQL_LOG','/path/to/mysql.log');//定义mysql的log文件路径，请先确保有读权限
