@@ -41,17 +41,17 @@ Putty 是一款功能强大的终端连接工具(但是界面简陋)，在window
 
 用linux的dalao可以直接打开终端输入 `ssh 用户名@ip` 进行登录
 
-[putty](../Image/171008_linux_abc_putty.png)
+![putty](../Image/171008_linux_abc_putty.png)
 
 这是打开putty后的界面，左边是一堆设置，右边是连接信息。Host Name处就是你linux服务器的ip地址，填入后直接点open即可
 
-[putty_rsa](../Image/171008_linux_abc_putty_rsa.png)
+![putty_rsa](../Image/171008_linux_abc_putty_rsa.png)
 
 随后你可能看到这样的一个框。由于ssh是基于rsa加密进行传输的，而在首次通信前我们和服务器都不知道对方的公钥是啥，这个框就告诉你服务器提供的公钥的指纹，供你进行确认，一般来说，我们信任即可，所以点是，之后软件会把这个公钥存下来，如果下次连接时和这个是一样的，则自动信任了。*如果之后链接弹出个框告诉你服务器提供的公钥和缓存里的公钥不一致，你就要当心是否有人劫持了你到服务器的流量了(中间人攻击)。*
 
 之后则进入了终端环境。服务器会先要求你进行身份认证，就相当于你开电脑输入账号密码才能系统啦23333
 
-[qcloud_auth](../Image/171008_linux_abc_qcloud_auth.png)
+![qcloud_auth](../Image/171008_linux_abc_qcloud_auth.png)
 
  `login as:` 意思是提醒你输入要登录的用户名，这时候请查询开通云服务器后服务商给你发的信息了，里面会包括默认用户名和密码（或是在创建时已设定）。在以往一般是提供`root`账号(root 账号你可以理解为是linux系统里的超级管理员，拥有最高的权限，但是直接使用这个账号进行操作是十分危险的)，现在一般是提供一个普通使用者身份的账号给你，然后通过`sudo`来执行需要`root`账户执行的命令
 
@@ -59,7 +59,7 @@ ubuntu系统一般给的是`ubuntu`
 
 输入`ubuntu` 回车
 
-[qcloud_auth_passwd](../Image/171008_linux_abc_qcloud_auth_passwd.png)
+![qcloud_auth_passwd](../Image/171008_linux_abc_qcloud_auth_passwd.png)
 
 接下来是要求输入密码了，将密码填入，回车即可(*注意密码输入时并不会显示出来*)
 
@@ -69,7 +69,7 @@ ubuntu系统一般给的是`ubuntu`
 
 粘贴代码 ` sudo apt-get install screenfetch -y && clear && screenfetch` 回车（如果要求输入密码再把密码输一遍）
 
-[screenfetch](../Image/171008_linux_abc_screenfetch.png)
+![screenfetch](../Image/171008_linux_abc_screenfetch.png)
 
 呐，多可爱~
 
