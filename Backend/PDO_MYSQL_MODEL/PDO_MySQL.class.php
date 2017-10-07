@@ -2,36 +2,36 @@
 //header('content-type:text/html;charset=utf-8');
 class PDOMySQL
 {
-    private static $config=array();//设置连接参数，配置信息
-    private static $link=null;//保存连接标识符
-    private static $dbdebug=false;//是否开启DEBUG模式
-    private static $table='';//记录操作的数据表名
-    private static $columns=array();//记录表中字段名
-    private static $pconnect=false;//是否开启长连接
-    private static $dbVersion=null;//保存数据库版本
-    private static $connected=false;//是否连接成功
-    private static $PDOStatement=null;//保存PDOStatement对象
-    private static $queryStr=null;//保存最后执行的操作
-    private static $error=null;//报错错误信息
-    private static $lastInsertId=null;//保存上一步插入操作产生AUTO_INCREMENT
-    private static $numRows=0;//上一步操作产生受影响的记录的条数
-    private static $MySQL_log='';//MySQL的日志文件路径
+    private $config=array();//设置连接参数，配置信息
+    private $link=null;//保存连接标识符
+    private $dbdebug=false;//是否开启DEBUG模式
+    private $table='';//记录操作的数据表名
+    private $columns=array();//记录表中字段名
+    private $pconnect=false;//是否开启长连接
+    private $dbVersion=null;//保存数据库版本
+    private $connected=false;//是否连接成功
+    private $PDOStatement=null;//保存PDOStatement对象
+    private $queryStr=null;//保存最后执行的操作
+    private $error=null;//报错错误信息
+    private $lastInsertId=null;//保存上一步插入操作产生AUTO_INCREMENT
+    private $numRows=0;//上一步操作产生受影响的记录的条数
+    private $MySQL_log='';//MySQL的日志文件路径
 
-    private static $fieldString='';
-    private static $joinString='';
-    private static $whereString='';
-    private static $groupString='';
-    private static $havingString='';
-    private static $orderString='';
-    private static $limitString='';
-    private static $aliasString='';
-    private static $tmp_table='';
-    private static $fetchSql=false;
+    private $fieldString='';
+    private $joinString='';
+    private $whereString='';
+    private $groupString='';
+    private $havingString='';
+    private $orderString='';
+    private $limitString='';
+    private $aliasString='';
+    private $tmp_table='';
+    private $fetchSql=false;
 
-    private static $whereStringArray=array();
-    private static $whereValueArray=array();
+    private $whereStringArray=array();
+    private $whereValueArray=array();
 
-    private static $SQL_logic = array('AND', 'OR', 'XOR');//SQL语句支持的逻辑运算符
+    private $SQL_logic = array('AND', 'OR', 'XOR');//SQL语句支持的逻辑运算符
 
     /**
      * 构造函数，连接PDO
@@ -45,19 +45,19 @@ class PDOMySQL
     public function __construct($dbtable, $dbConfig = '')
     {
         if (!class_exists("PDO")) {
-            self::throw_exception("不支持PDO，请先开启");
+            $this->throw_exception("不支持PDO，请先开启");
             return false;
         }
         if ($dbConfig!=''&&!is_array($dbConfig)) {
-            self::throw_exception("数据库配置信息参数需使用数组形式传入");
+            $this->throw_exception("数据库配置信息参数需使用数组形式传入");
             return false;
         }
         if ($dbConfig=='') {
             if (defined('DB_DEBUG')&&DB_DEBUG===true) {
-                self::$dbdebug = true;
+                $this->dbdebug = true;
             }
             if (defined('MYSQL_LOG')&&is_string(MYSQL_LOG)) {
-                self::$MySQL_log = MYSQL_LOG;
+                $this->MySQL_log = MYSQL_LOG;
             }
             $dbConfig=array(
                 'hostname'=>DB_HOST,
@@ -70,46 +70,46 @@ class PDOMySQL
             );
         } else {
             if (isset($dbConfig['DB_DEBUG'])&&$dbConfig['DB_DEBUG']) {
-                self::$dbdebug = true;
+                $this->dbdebug = true;
                 unset($dbConfig['DB_DEBUG']);
             }
             if (isset($dbConfig['MYSQL_LOG'])&&is_string($dbConfig['MYSQL_LOG'])) {
-                self::$MySQL_log = $dbConfig['MYSQL_LOG'];
+                $this->MySQL_log = $dbConfig['MYSQL_LOG'];
                 unset($dbConfig['MYSQL_LOG']);
             }
         }
         if (empty($dbConfig['hostname'])) {
-            self::throw_exception('没有定义数据库配置，请先定义');
+            $this->throw_exception('没有定义数据库配置，请先定义');
             return false;
         }
-        self::$config=$dbConfig;
-        if (empty(self::$config['params'])) {
-            self::$config['params']=array();
+        $this->config=$dbConfig;
+        if (empty($this->config['params'])) {
+            $this->config['params']=array();
         }
-        if (!isset(self::$link)) {
-            $configs=self::$config;
-            if (self::$pconnect) {
+        if (!isset($this->link)) {
+            $configs=$this->config;
+            if ($this->pconnect) {
                 //开启长连接，添加到配置数组中
                 $configs['params'][constant("PDO::ATTR_PERSISTENT")]=true;
             }
             try {
-                self::$link=new PDO($configs['dsn'], $configs['username'], $configs['password'], $configs['params']);
+                $this->link=new PDO($configs['dsn'], $configs['username'], $configs['password'], $configs['params']);
             } catch (PDOException $e) {
-                self::throw_exception($e->getMessage());
+                $this->throw_exception($e->getMessage());
                 return false;
             }
-            if (!self::$link) {
-                self::throw_exception('PDO连接错误');
+            if (!$this->link) {
+                $this->throw_exception('PDO连接错误');
                 return false;
             }
-            if (!self::in_db($dbtable)) {
-                self::throw_exception('数据库'.DB_NAME.'中不存在'.$dbtable.'表');
+            if (!$this->in_db($dbtable)) {
+                $this->throw_exception('数据库'.DB_NAME.'中不存在'.$dbtable.'表');
                 return false;
             }
-            self::$table=$dbtable;
-            self::$link->exec('SET NAMES '.DB_CHARSET);
-            self::$dbVersion=self::$link->getAttribute(constant("PDO::ATTR_SERVER_VERSION"));
-            self::$connected=true;
+            $this->table=$dbtable;
+            $this->link->exec('SET NAMES '.DB_CHARSET);
+            $this->dbVersion=$this->link->getAttribute(constant("PDO::ATTR_SERVER_VERSION"));
+            $this->connected=true;
             unset($configs);
         }
     }
@@ -121,7 +121,7 @@ class PDOMySQL
      */
     private function in_db($dbtable)
     {
-        $stmt = self::$link->query("show tables");
+        $stmt = $this->link->query("show tables");
         foreach ($stmt as $row) {
             if ($dbtable==$row[0]) {
                 return true;
@@ -131,18 +131,18 @@ class PDOMySQL
     }
 
     /**
-     * 初始化时获取数据表字段，标注主键，存储在self::$columns中
+     * 初始化时获取数据表字段，标注主键，存储在$this->columns中
      * @param string $dbtable
      */
     private function set_columns($dbtable)
     {
-        $stmt = self::$link->query("SHOW COLUMNS FROM `".$dbtable."`");
+        $stmt = $this->link->query("SHOW COLUMNS FROM `".$dbtable."`");
         $res = $stmt->fetchAll(PDO::FETCH_ASSOC);
         foreach ($res as $array) {
             if ($array['Key']=='PRI') {
-                self::$columns['PRI']=$array['Field'];
+                $this->columns['PRI']=$array['Field'];
             }
-            self::$columns[] = $array['Field'];
+            $this->columns[] = $array['Field'];
         }
     }
 
@@ -155,7 +155,7 @@ class PDOMySQL
     {
         $param_number = count($where);
         if (!is_string($where[0])&&!is_array($where[0])) {
-            self::throw_exception("where子句的参数只支持字符串和数组");
+            $this->throw_exception("where子句的参数只支持字符串和数组");
             return false;
         }
         if (is_string($where[0])) {
@@ -175,12 +175,12 @@ class PDOMySQL
             $whereSubString = '( '.$whereSubString.' )';
         } elseif (is_array($where[0])) {
             if ($param_number>1) {
-                self::throw_exception("where子句传入数组参数仅支持一个参数");
+                $this->throw_exception("where子句传入数组参数仅支持一个参数");
                 return false;
             }
-            $whereSubString = self::parseWhereArrayParam($where[0]);
+            $whereSubString = $this->parseWhereArrayParam($where[0]);
         }
-        self::$whereStringArray[] = $whereSubString;
+        $this->whereStringArray[] = $whereSubString;
         return $this;
     }
 
@@ -189,17 +189,17 @@ class PDOMySQL
      */
     public function parseWhere()
     {
-         $length = count(self::$whereStringArray);
+         $length = count($this->whereStringArray);
         if ($length == 0) {
             return;
         }
         if ($length>1) {
-            self::$whereString = ' WHERE ( '.self::$whereStringArray[0].' )';
+            $this->whereString = ' WHERE ( '.$this->whereStringArray[0].' )';
             for ($i=1; $i<$length; $i++) {
-                self::$whereString .= ' AND ( '.self::$whereStringArray[$i].' )';
+                $this->whereString .= ' AND ( '.$this->whereStringArray[$i].' )';
             }
         } else {
-            self::$whereString = ' WHERE '.self::$whereStringArray[0];
+            $this->whereString = ' WHERE '.$this->whereStringArray[0];
         }
     }
 
@@ -211,31 +211,31 @@ class PDOMySQL
     public function table($table)
     {
         if (is_string($table)) {
-            self::$tmp_table = $table;
+            $this->tmp_table = $table;
         } elseif (is_array($table)) {
             if (count($table)==0) {
-                self::throw_exception('table子句参数不能传空数组');
+                $this->throw_exception('table子句参数不能传空数组');
                 return false;
             }
-            self::$tmp_table = '';
+            $this->tmp_table = '';
             foreach ($table as $key => $val) {
                 if (is_string($key)) {
                     $match_times=preg_match('/\./', $key);
                     if (0===$match_times) {
-                        self::$tmp_table .= '`'.trim($key).'` AS `'.trim($val).'`,';
+                        $this->tmp_table .= '`'.trim($key).'` AS `'.trim($val).'`,';
                     } elseif (1===$match_times) {
-                        self::$tmp_table .= trim($key).' AS `'.trim($val).'`,';
+                        $this->tmp_table .= trim($key).' AS `'.trim($val).'`,';
                     } else {
-                        self::throw_exception('table子句数组参数的键值非法："'.$key.'"');
+                        $this->throw_exception('table子句数组参数的键值非法："'.$key.'"');
                         return false;
                     }
                 } else {
-                    self::$tmp_table .= '`'.trim($val).'`,';
+                    $this->tmp_table .= '`'.trim($val).'`,';
                 }
             }
-            self::$tmp_table = rtrim(self::$tmp_table, ',');
+            $this->tmp_table = rtrim($this->tmp_table, ',');
         } else {
-            self::throw_exception('table子句的参数类型错误："'.$table.'"');
+            $this->throw_exception('table子句的参数类型错误："'.$table.'"');
             return false;
         }
         return $this;
@@ -249,9 +249,9 @@ class PDOMySQL
     public function alias($alias)
     {
         if (is_string($alias)&&$alias!='') {
-            self::$aliasString = ' AS `'.$alias.'`';
+            $this->aliasString = ' AS `'.$alias.'`';
         } else {
-            self::throw_exception('alias子句的参数须是字符串');
+            $this->throw_exception('alias子句的参数须是字符串');
             return false;
         }
         return $this;
@@ -267,21 +267,21 @@ class PDOMySQL
     {
         if ($field===true) {
             //显示调用所有字段
-            self::set_columns(self::$tmp_table===''?self::$table:self::$tmp_table);
-            $columns_array = self::$columns;
+            $this->set_columns($this->tmp_table===''?$this->table:$this->tmp_table);
+            $columns_array = $this->columns;
             unset($columns_array['PRI']);
             foreach ($columns_array as $key => $val) {
-                self::$fieldString .= '`'.$val.'`';
+                $this->fieldString .= '`'.$val.'`';
             }
             return $this;
         }
         if ($filter===true) {
             if (!is_string($field)&&!is_array($field)) {
-                self::throw_exception("field子句的参数只支持字符串和数组");
+                $this->throw_exception("field子句的参数只支持字符串和数组");
                 return false;
             }
-            self::set_columns(self::$tmp_table===''?self::$table:self::$tmp_table);
-            $columns_array = self::$columns;
+            $this->set_columns($this->tmp_table===''?$this->table:$this->tmp_table);
+            $columns_array = $this->columns;
             unset($columns_array['PRI']);
             $explode_array = array();
             if (is_string($field)) {
@@ -297,42 +297,42 @@ class PDOMySQL
                 }
             }
             foreach ($columns_array as $key => $val) {
-                self::$fieldString .= '`'.$val.'`,';
+                $this->fieldString .= '`'.$val.'`,';
             }
-            self::$fieldString = rtrim(self::$fieldString, ',');
-            self::$fieldString = ' '.self::$fieldString;
+            $this->fieldString = rtrim($this->fieldString, ',');
+            $this->fieldString = ' '.$this->fieldString;
             return $this;
         }
         if ($field===''||$field==='*') {
-            self::$fieldString = ' *';
+            $this->fieldString = ' *';
             return $this;
         }
         if (!is_string($field)&&!is_array($field)) {
-            self::throw_exception("field子句的参数只支持字符串和数组");
+            $this->throw_exception("field子句的参数只支持字符串和数组");
             return false;
         }
         if (is_array($field)) {
             foreach ($field as $key => $val) {
                 if (is_int($key)) {
-                    $after_process_val = self::addSpecialChar($val);
-                    self::$fieldString .= $after_process_val.',';
+                    $after_process_val = $this->addSpecialChar($val);
+                    $this->fieldString .= $after_process_val.',';
                 } else {
-                    $after_process_key = self::addSpecialChar($key);
-                    $after_process_val = self::addSpecialChar($val);
-                    self::$fieldString .= $after_process_key.' AS '.$after_process_val.',';
+                    $after_process_key = $this->addSpecialChar($key);
+                    $after_process_val = $this->addSpecialChar($val);
+                    $this->fieldString .= $after_process_key.' AS '.$after_process_val.',';
                 }
             }
-            self::$fieldString = rtrim(self::$fieldString, ',');
+            $this->fieldString = rtrim($this->fieldString, ',');
         }
         if (is_string($field)) {
             $field_array = explode(',', $field);
             $length = count($field_array);
             for ($i=0; $i<$length; $i++) {
-                $field_array[$i] = self::addSpecialChar($field_array[$i]);
+                $field_array[$i] = $this->addSpecialChar($field_array[$i]);
             }
-            self::$fieldString = implode(',', $field_array);
+            $this->fieldString = implode(',', $field_array);
         }
-        self::$fieldString = ' '.self::$fieldString;
+        $this->fieldString = ' '.$this->fieldString;
         return $this;
     }
 
@@ -344,27 +344,27 @@ class PDOMySQL
     public function order($order)
     {
         if (!is_string($order)&&!is_array($order)) {
-            self::throw_exception("order子句的参数只支持字符串和数组");
+            $this->throw_exception("order子句的参数只支持字符串和数组");
             return false;
         }
         if (is_string($order)) {
-            self::$orderString = ' ORDER BY '.$oreder;
+            $this->orderString = ' ORDER BY '.$oreder;
         }
         if (is_array($order)) {
-            self::$orderString = ' ORDER BY ';
+            $this->orderString = ' ORDER BY ';
             foreach ($order as $key => $val) {
                 if (is_int($key)) {
-                    self::$orderString .= '`'.trim($val).'`,';
+                    $this->orderString .= '`'.trim($val).'`,';
                 } else {
                     if (strtolower($val)!='desc'&&strtolower($val)!='asc') {
-                        self::throw_exception("order子句请使用desc或asc关键词指定排序，默认为asc，出现未知字符");
-                        self::$orderString = '';
+                        $this->throw_exception("order子句请使用desc或asc关键词指定排序，默认为asc，出现未知字符");
+                        $this->orderString = '';
                         return false;
                     }
-                    self::$orderString .= '`'.trim($key).'` '.$val.',';
+                    $this->orderString .= '`'.trim($key).'` '.$val.',';
                 }
             }
-            self::$orderString = rtrim(self::$orderString, ',');
+            $this->orderString = rtrim($this->orderString, ',');
         }
         return $this;
     }
@@ -380,26 +380,26 @@ class PDOMySQL
         $param_number = count($limit);
         if ($param_number==1) {
             if (!is_int($limit[0])&&!is_string($limit[0])) {
-                self::throw_exception("limit子句的参数非法");
+                $this->throw_exception("limit子句的参数非法");
                 return false;
             }
             if (is_string($limit[0])) {
                 if (preg_match('/^\d+,\d+$/', $limit[0])==0&&preg_match('/^\d+$/', $limit[0])==0) {
-                    self::throw_exception("limit子句的参数非法");
+                    $this->throw_exception("limit子句的参数非法");
                     return false;
                 }
             }
-            self::$limitString = ' LIMIT '.$limit[0];
+            $this->limitString = ' LIMIT '.$limit[0];
         } elseif ($param_number==2) {
             for ($i=0; $i<2; $i++) {
                 if (!is_int($limit[$i])) {
-                    self::throw_exception("limit子句的参数非法");
+                    $this->throw_exception("limit子句的参数非法");
                     return false;
                 }
             }
-            self::$limitString = ' LIMIT '.$limit[0].','.$limit[1];
+            $this->limitString = ' LIMIT '.$limit[0].','.$limit[1];
         } else {
-            self::throw_exception("limit子句的参数数量必须为一或两个");
+            $this->throw_exception("limit子句的参数数量必须为一或两个");
             return false;
         }
         return $this;
@@ -416,11 +416,11 @@ class PDOMySQL
     public function page($page_number, $amount)
     {
         if (!is_numeric($page_number)||!is_numeric($amount)) {
-            self::throw_exception("page方法只支持两个数字参数的写法");
+            $this->throw_exception("page方法只支持两个数字参数的写法");
             return false;
         }
         $start = ($page_number-1) * $amount;
-        self::$limitString = ' LIMIT '.$start.','.$amount;
+        $this->limitString = ' LIMIT '.$start.','.$amount;
         return $this;
     }
 
@@ -432,10 +432,10 @@ class PDOMySQL
     public function group($group)
     {
         if (!is_string($group)) {
-            self::throw_exception("group子句的参数只支持字符串");
+            $this->throw_exception("group子句的参数只支持字符串");
             return false;
         }
-        self::$groupString = ' GROUP BY '.$group;
+        $this->groupString = ' GROUP BY '.$group;
         return $this;
     }
     
@@ -447,10 +447,10 @@ class PDOMySQL
     public function having($having)
     {
         if (!is_string($having)) {
-            self::throw_exception("having子句的参数只支持字符串");
+            $this->throw_exception("having子句的参数只支持字符串");
             return false;
         }
-        self::$havingString = ' HAVING BY '.$having;
+        $this->havingString = ' HAVING BY '.$having;
         return $this;
     }
 
@@ -464,17 +464,17 @@ class PDOMySQL
     public function join($join)
     {
         if (!is_string($join)&&!is_array($join)) {
-            self::throw_exception("join子句的参数只支持字符串和数组");
+            $this->throw_exception("join子句的参数只支持字符串和数组");
             return false;
         }
         if (is_string($join)) {
-            self::$joinString .= ' INNER JOIN '.$join;
+            $this->joinString .= ' INNER JOIN '.$join;
         } else {
             if (!is_string($join[0])||!is_string($join[1])) {
-                self::throw_exception("join子句中的数组参数的前两个元素必须都是字符串");
+                $this->throw_exception("join子句中的数组参数的前两个元素必须都是字符串");
                 return false;
             }
-            self::$joinString .= ' '.$join[1].' JOIN '.$join[0];
+            $this->joinString .= ' '.$join[1].' JOIN '.$join[0];
         }
         return $this;
     }
@@ -486,7 +486,7 @@ class PDOMySQL
      */
     public function fetchSql($fetchSql = false)
     {
-        self::$fetchSql = $fetchSql;
+        $this->fetchSql = $fetchSql;
         return $this;
     }
 
@@ -499,9 +499,9 @@ class PDOMySQL
      */
     public function count($field = '*')
     {
-        self::$fieldString = ' COUNT('.$field.') AS f_count';
-        self::$limitString = ' LIMIT 1';
-        $res = self::select();
+        $this->fieldString = ' COUNT('.$field.') AS f_count';
+        $this->limitString = ' LIMIT 1';
+        $res = $this->select();
         return $res[0]['f_count'];
     }
 
@@ -513,9 +513,9 @@ class PDOMySQL
      */
     public function max($field)
     {
-        self::$fieldString = ' MAX('.$field.') AS f_max';
-        self::$limitString = ' LIMIT 1';
-        $res = self::select();
+        $this->fieldString = ' MAX('.$field.') AS f_max';
+        $this->limitString = ' LIMIT 1';
+        $res = $this->select();
         return $res[0]['f_max'];
     }
 
@@ -527,9 +527,9 @@ class PDOMySQL
      */
     public function min($field)
     {
-        self::$fieldString = ' MIN('.$field.') AS f_min';
-        self::$limitString = ' LIMIT 1';
-        $res = self::select();
+        $this->fieldString = ' MIN('.$field.') AS f_min';
+        $this->limitString = ' LIMIT 1';
+        $res = $this->select();
         return $res[0]['f_min'];
     }
 
@@ -541,9 +541,9 @@ class PDOMySQL
      */
     public function avg($field)
     {
-        self::$fieldString = ' AVG('.$field.') AS f_avg';
-        self::$limitString = ' LIMIT 1';
-        $res = self::select();
+        $this->fieldString = ' AVG('.$field.') AS f_avg';
+        $this->limitString = ' LIMIT 1';
+        $res = $this->select();
         return $res[0]['f_avg'];
     }
 
@@ -554,9 +554,9 @@ class PDOMySQL
      */
     public function sum($field)
     {
-        self::$fieldString = ' SUM('.$field.') AS f_sum';
-        self::$limitString = ' LIMIT 1';
-        $res = self::select();
+        $this->fieldString = ' SUM('.$field.') AS f_sum';
+        $this->limitString = ' LIMIT 1';
+        $res = $this->select();
         return $res[0]['f_sum'];
     }
 
@@ -568,16 +568,16 @@ class PDOMySQL
     public function buildSql()
     {
         $sqlString = '';
-        if (self::$tmp_table != '') {
-            $table_name = self::$tmp_table.self::$aliasString;
+        if ($this->tmp_table != '') {
+            $table_name = $this->tmp_table.$this->aliasString;
         } else {
-            $table_name = '`'.self::$table.'`'.self::$aliasString;
+            $table_name = '`'.$this->table.'`'.$this->aliasString;
         }
-        self::$fieldString = self::$fieldString=='' ? ' *' : self::$fieldString;
-        self::parseWhere();
-        $sqlString .= 'SELECT'.self::$fieldString.' FROM '.$table_name.self::$joinString.self::$whereString.self::$groupString.self::$havingString.self::$orderString.self::$groupString.self::$limitString;
-        $buildSql = self::replaceSpecialChar('/\?/', self::$whereValueArray, $sqlString);
-        self::clearSubString();
+        $this->fieldString = $this->fieldString=='' ? ' *' : $this->fieldString;
+        $this->parseWhere();
+        $sqlString .= 'SELECT'.$this->fieldString.' FROM '.$table_name.$this->joinString.$this->whereString.$this->groupString.$this->havingString.$this->orderString.$this->groupString.$this->limitString;
+        $buildSql = $this->replaceSpecialChar('/\?/', $this->whereValueArray, $sqlString);
+        $this->clearSubString();
         return '( '.$buildSql.' )';
     }
 
@@ -589,21 +589,21 @@ class PDOMySQL
     public function find($primary_key_value = '')
     {
         $sqlString = '';
-        if (self::$tmp_table != '') {
-            $table_name = self::$tmp_table.self::$aliasString;
+        if ($this->tmp_table != '') {
+            $table_name = $this->tmp_table.$this->aliasString;
         } else {
-            $table_name = '`'.self::$table.'`'.self::$aliasString;
+            $table_name = '`'.$this->table.'`'.$this->aliasString;
         }
         if ($primary_key_value!='') {
-            self::set_columns(self::$tmp_table===''?self::$table:self::$tmp_table);
-            self::$whereStringArray[] = '`'.self::$columns['PRI'].'` = ?';
-            self::$whereValueArray[] = $primary_key_value;
+            $this->set_columns($this->tmp_table===''?$this->table:$this->tmp_table);
+            $this->whereStringArray[] = '`'.$this->columns['PRI'].'` = ?';
+            $this->whereValueArray[] = $primary_key_value;
         }
-        self::$limitString = ' LIMIT 1';
-        self::$fieldString = self::$fieldString=='' ? ' *' : self::$fieldString;
-        self::parseWhere();
-        $sqlString .= 'SELECT'.self::$fieldString.' FROM '.$table_name.self::$joinString.self::$whereString.self::$groupString.self::$havingString.self::$orderString.self::$groupString.self::$limitString;
-        $res = self::query($sqlString, true);
+        $this->limitString = ' LIMIT 1';
+        $this->fieldString = $this->fieldString=='' ? ' *' : $this->fieldString;
+        $this->parseWhere();
+        $sqlString .= 'SELECT'.$this->fieldString.' FROM '.$table_name.$this->joinString.$this->whereString.$this->groupString.$this->havingString.$this->orderString.$this->groupString.$this->limitString;
+        $res = $this->query($sqlString, true);
         return $res;
     }
 
@@ -615,18 +615,18 @@ class PDOMySQL
     public function select($query = true)
     {
         $sqlString = '';
-        if (self::$tmp_table != '') {
-            $table_name = self::$tmp_table.self::$aliasString;
+        if ($this->tmp_table != '') {
+            $table_name = $this->tmp_table.$this->aliasString;
         } else {
-            $table_name = '`'.self::$table.'`'.self::$aliasString;
+            $table_name = '`'.$this->table.'`'.$this->aliasString;
         }
-        self::$fieldString = self::$fieldString=='' ? ' *' : self::$fieldString;
-        self::parseWhere();
-        $sqlString .= 'SELECT'.self::$fieldString.' FROM '.$table_name.self::$joinString.self::$whereString.self::$groupString.self::$havingString.self::$orderString.self::$groupString.self::$limitString;
+        $this->fieldString = $this->fieldString=='' ? ' *' : $this->fieldString;
+        $this->parseWhere();
+        $sqlString .= 'SELECT'.$this->fieldString.' FROM '.$table_name.$this->joinString.$this->whereString.$this->groupString.$this->havingString.$this->orderString.$this->groupString.$this->limitString;
         if (false===$query) {
-            self::$fetchSql = true;
+            $this->fetchSql = true;
         }
-        $res = self::query($sqlString);
+        $res = $this->query($sqlString);
         return $res;
     }
 
@@ -640,7 +640,7 @@ class PDOMySQL
         $field_str = '';
         if ($data!='') {
             if (!is_array($data)) {
-                self::throw_exception('add方法只支持传入数组');
+                $this->throw_exception('add方法只支持传入数组');
                 return false;
             }
             $length = count($data);
@@ -649,7 +649,7 @@ class PDOMySQL
             } else {
                 foreach ($data as $key => $val) {
                     $field_str .= '`'.$key.'`,';
-                    self::$whereValueArray[] = $val;
+                    $this->whereValueArray[] = $val;
                 }
                 $field_str = rtrim($field_str, ',');
                 $placeholder = '?';
@@ -660,14 +660,15 @@ class PDOMySQL
         } else {
             $placeholder = '';
         }
-        if (self::$tmp_table != '') {
-            $table_name = self::$tmp_table;
+        if ($this->tmp_table != '') {
+            $table_name = $this->tmp_table;
         } else {
-            $table_name = '`'.self::$table.'`';
+            $table_name = '`'.$this->table.'`';
         }
         $sqlString = 'INSERT INTO '.$table_name.' ('.$field_str.') VALUES ('.$placeholder.')';
-        self::execute($sqlString);
-        $res = self::$link->lastInsertId();
+        $res = $this->execute($sqlString);
+        if(is_string($res))return $res;
+        $res = $this->link->lastInsertId();
         return $res;
     }
 
@@ -681,7 +682,7 @@ class PDOMySQL
     public function addAll($dataList)
     {
         if (!is_array($dataList)) {
-            self::throw_exception('addAll方法只支持传入数组');
+            $this->throw_exception('addAll方法只支持传入数组');
             return false;
         }
         $field_str = '';
@@ -689,15 +690,15 @@ class PDOMySQL
         $number = count($dataList);
         $valueListStr = '';
         if ($number===0) {
-            self::throw_exception('addAll方法请勿传入空数组');
+            $this->throw_exception('addAll方法请勿传入空数组');
             return false;
         }
         if (!isset($dataList[$number-1])) {
-            self::throw_exception('addAll方法传入的二维数组参数非法(须是索引数组)');
+            $this->throw_exception('addAll方法传入的二维数组参数非法(须是索引数组)');
             return false;
         }
         if (!is_array($dataList[0])) {
-            self::throw_exception('addAll方法传入的二维数组参数非法(数组第一个元素非数组)');
+            $this->throw_exception('addAll方法传入的二维数组参数非法(数组第一个元素非数组)');
             return false;
         }
         $number_field = count($dataList[0]);
@@ -705,7 +706,7 @@ class PDOMySQL
             $valueListStr .= '()';
             for ($i=1; $i<$number; $i++) {
                 if ($dataList[$i]!=array()) {
-                    self::throw_exception('addAll方法传入的二维数组参数非法');
+                    $this->throw_exception('addAll方法传入的二维数组参数非法');
                     return false;
                 }
                 $valueListStr .= ',()';
@@ -714,7 +715,7 @@ class PDOMySQL
             $valueStr = '(';
             foreach ($dataList[0] as $key => $val) {
                 $fieldList[] = $key;
-                self::$whereValueArray[] = $val;
+                $this->whereValueArray[] = $val;
                 $field_str .= $key.',';
                 $valueStr .= '?,';
             }
@@ -724,19 +725,20 @@ class PDOMySQL
             $valueListStr .= $valueStr;
             for ($i=1; $i<$number; $i++) {
                 for ($j=0; $j<$number_field; $j++) {
-                    self::$whereValueArray[] = $dataList[$i][$fieldList[$j]];
+                    $this->whereValueArray[] = $dataList[$i][$fieldList[$j]];
                 }
                 $valueListStr .= ','.$valueStr;
             }
         }
-        if (self::$tmp_table != '') {
-            $table_name = self::$tmp_table;
+        if ($this->tmp_table != '') {
+            $table_name = $this->tmp_table;
         } else {
-            $table_name = '`'.self::$table.'`';
+            $table_name = '`'.$this->table.'`';
         }
         $sqlString = 'INSERT INTO '.$table_name.' ('.$field_str.') VALUES '.$valueListStr;
-        self::execute($sqlString);
-        $res = self::$link->lastInsertId();
+        $res = $this->execute($sqlString);
+        if(is_string($res))return $res;
+        $res = $this->link->lastInsertId();
         return $res;
     }
 
@@ -750,34 +752,35 @@ class PDOMySQL
     {
         $param_number = count($field);
         if ($field===0) {
-            self::throw_exception('setField子句须传入参数');
+            $this->throw_exception('setField子句须传入参数');
             return false;
         }
-        self::parseWhere();
-        if (self::$whereString=='') {
-            self::set_columns(self::$tmp_table===''?self::$table:self::$tmp_table);
-            if (is_array($field[0])&&isset($field[0][self::$columns['PRI']])) {
-                if (is_array($field[0][self::$columns['PRI']])) {
-                    if ($field[0][self::$columns['PRI']][0]=='exp') {
-                        self::$whereString = ' WHERE `'.self::$columns['PRI'].'` = '.trim($field[0][self::$columns['PRI']][1]);
+        $this->parseWhere();
+        if ($this->whereString=='') {
+            $this->set_columns($this->tmp_table===''?$this->table:$this->tmp_table);
+            if (is_array($field[0])&&isset($field[0][$this->columns['PRI']])) {
+                if (is_array($field[0][$this->columns['PRI']])) {
+                    if ($field[0][$this->columns['PRI']][0]=='exp') {
+                        $this->whereString = ' WHERE `'.$this->columns['PRI'].'` = '.trim($field[0][$this->columns['PRI']][1]);
                     } else {
-                        self::throw_exception('setField子句仅支持exp表达式更新');
+                        $this->throw_exception('setField子句仅支持exp表达式更新');
                         return false;
                     }
                 } else {
-                    self::$whereString = ' WHERE `'.self::$columns['PRI'].'` = ?';
-                    self::$whereValueArray[] = $field[0][self::$columns['PRI']];
+                    $this->whereString = ' WHERE `'.$this->columns['PRI'].'` = ?';
+                    $this->whereValueArray[] = $field[0][$this->columns['PRI']];
                 }
-                unset($field[0][self::$columns['PRI']]);
+                unset($field[0][$this->columns['PRI']]);
             } else {
-                self::throw_exception('没有任何更新条件，数据对象本身也不包含主键字段，不被允许执行更新操作');
+                $this->throw_exception('没有任何更新条件，数据对象本身也不包含主键字段，不被允许执行更新操作');
                 return false;
             }
         }
         $setFieldStr = '';
+        $updateValueArray=array();
         if (is_string($field[0])) {
             if ($param_number!=2) {
-                self::throw_exception('setField子句接收两个参数（属性名，属性值）');
+                $this->throw_exception('setField子句接收两个参数（属性名，属性值）');
                 return false;
             }
             if (strpos($field[0], '.')===false) {
@@ -785,10 +788,10 @@ class PDOMySQL
             } else {
                 $setFieldStr .= trim($field[0]).' = ?';
             }
-            self::$whereValueArray[] = $field[1];
+            $updateValueArray[] = $field[1];
         } elseif (is_array($field[0])) {
             if ($param_number!=1) {
-                self::throw_exception('setField子句只接收一个数组参数');
+                $this->throw_exception('setField子句只接收一个数组参数');
                 return false;
             }
             foreach ($field[0] as $key => $val) {
@@ -800,7 +803,7 @@ class PDOMySQL
                             $setFieldStr .= trim($key).' = '.trim($val[1]).',';
                         }
                     } else {
-                        self::throw_exception('setField子句仅支持exp表达式更新');
+                        $this->throw_exception('setField子句仅支持exp表达式更新');
                         return false;
                     }
                 } else {
@@ -809,21 +812,22 @@ class PDOMySQL
                     } else {
                         $setFieldStr .= trim($key).' = ?,';
                     }
-                    self::$whereValueArray[] = $val;
+                    $updateValueArray[] = $val;
                 }
             }
             $setFieldStr = rtrim($setFieldStr, ',');
         } else {
-            self::throw_exception('setField子句传入的参数类型错误：'.$field[0]);
+            $this->throw_exception('setField子句传入的参数类型错误：'.$field[0]);
             return false;
         }
-        if (self::$tmp_table != '') {
-            $table_name = self::$tmp_table.self::$aliasString;
+        $this->whereValueArray = array_merge($updateValueArray,$this->whereValueArray);
+        if ($this->tmp_table != '') {
+            $table_name = $this->tmp_table.$this->aliasString;
         } else {
-            $table_name = '`'.self::$table.'`'.self::$aliasString;
+            $table_name = '`'.$this->table.'`'.$this->aliasString;
         }
-        $sqlString = 'UPDATE '.$table_name.self::$joinString.' SET '.$setFieldStr.self::$whereString.self::$orderString.self::$limitString;
-        $res = self::execute($sqlString);
+        $sqlString = 'UPDATE '.$table_name.$this->joinString.' SET '.$setFieldStr.$this->whereString.$this->orderString.$this->limitString;
+        $res = $this->execute($sqlString);
         return $res;
     }
 
@@ -837,7 +841,7 @@ class PDOMySQL
     public function setInc($field, $value = 1)
     {
         $data[$field]=array('exp',$field.' + '.$number);
-        return self::save($data);
+        return $this->save($data);
     }
 
     /**
@@ -849,7 +853,7 @@ class PDOMySQL
     public function setDec($field, $value = 1)
     {
         $data[$field]=array('exp',$field.' - '.$number);
-        return self::save($data);
+        return $this->save($data);
     }
 
     /**
@@ -860,31 +864,32 @@ class PDOMySQL
     public function save($data)
     {
         if (!is_array($data)) {
-            self::throw_exception('save子句只接收数组参数');
+            $this->throw_exception('save子句只接收数组参数');
             return false;
         }
-        self::parseWhere();
-        if (self::$whereString=='') {
-            self::set_columns(self::$tmp_table===''?self::$table:self::$tmp_table);
-            if (isset($data[self::$columns['PRI']])) {
-                if (is_array($data[self::$columns['PRI']])) {
-                    if ($data[self::$columns['PRI']][0]=='exp') {
-                        self::$whereString = ' WHERE `'.self::$columns['PRI'].'` = '.trim($data[self::$columns['PRI']][1]);
+        $this->parseWhere();
+        if ($this->whereString=='') {
+            $this->set_columns($this->tmp_table===''?$this->table:$this->tmp_table);
+            if (isset($data[$this->columns['PRI']])) {
+                if (is_array($data[$this->columns['PRI']])) {
+                    if ($data[$this->columns['PRI']][0]=='exp') {
+                        $this->whereString = ' WHERE `'.$this->columns['PRI'].'` = '.trim($data[$this->columns['PRI']][1]);
                     } else {
-                        self::throw_exception('save子句仅支持exp表达式更新');
+                        $this->throw_exception('save子句仅支持exp表达式更新');
                         return false;
                     }
                 } else {
-                    self::$whereString = ' WHERE `'.self::$columns['PRI'].'` = ?';
-                    self::$whereValueArray[] = $data[self::$columns['PRI']];
+                    $this->whereString = ' WHERE `'.$this->columns['PRI'].'` = ?';
+                    $this->whereValueArray[] = $data[$this->columns['PRI']];
                 }
-                unset($data[self::$columns['PRI']]);
+                unset($data[$this->columns['PRI']]);
             } else {
-                self::throw_exception('没有任何更新条件，数据对象本身也不包含主键字段，不被允许执行更新操作');
+                $this->throw_exception('没有任何更新条件，数据对象本身也不包含主键字段，不被允许执行更新操作');
                 return false;
             }
         }
         $setFieldStr = '';
+        $updateValueArray = array();
         foreach ($data as $key => $val) {
             if (is_array($val)) {
                 //支持exp表达式进行数据更新
@@ -895,7 +900,7 @@ class PDOMySQL
                         $setFieldStr .= trim($key).' = '.trim($val[1]).',';
                     }
                 } else {
-                    self::throw_exception('save子句仅支持exp表达式更新');
+                    $this->throw_exception('save子句仅支持exp表达式更新');
                     return false;
                 }
             } else {
@@ -904,17 +909,18 @@ class PDOMySQL
                 } else {
                     $setFieldStr .= trim($key).' = ?,';
                 }
-                self::$whereValueArray[] = $val;
+                $updateValueArray[] = $val;
             }
         }
         $setFieldStr = rtrim($setFieldStr, ',');
-        if (self::$tmp_table != '') {
-            $table_name = self::$tmp_table.self::$aliasString;
+        $this->whereValueArray = array_merge($updateValueArray,$this->whereValueArray);
+        if ($this->tmp_table != '') {
+            $table_name = $this->tmp_table.$this->aliasString;
         } else {
-            $table_name = '`'.self::$table.'`'.self::$aliasString;
+            $table_name = '`'.$this->table.'`'.$this->aliasString;
         }
-        $sqlString = 'UPDATE '.$table_name.self::$joinString.' SET '.$setFieldStr.self::$whereString.self::$orderString.self::$limitString;
-        $res = self::execute($sqlString);
+        $sqlString = 'UPDATE '.$table_name.$this->joinString.' SET '.$setFieldStr.$this->whereString.$this->orderString.$this->limitString;
+        $res = $this->execute($sqlString);
         return $res;
     }
 
@@ -926,23 +932,23 @@ class PDOMySQL
     public function delete($table = '')
     {
         $sqlString = '';
-        if (self::$tmp_table != '') {
-            $table_name = self::$tmp_table.self::$aliasString;
+        if ($this->tmp_table != '') {
+            $table_name = $this->tmp_table.$this->aliasString;
         } else {
-            $table_name = '`'.self::$table.'`'.self::$aliasString;
+            $table_name = '`'.$this->table.'`'.$this->aliasString;
         }
         if ($table!='') {
             $table = ' '.$table;
         }
-        self::parseWhere();
-        if (self::$whereString=='') {
-            if (self::$joinString==''||stripos(self::$joinString, ' on ')===false) {
-                self::throw_exception('没有传入任何条件，不被允许执行删除操作');
+        $this->parseWhere();
+        if ($this->whereString=='') {
+            if ($this->joinString==''||stripos($this->joinString, ' on ')===false) {
+                $this->throw_exception('没有传入任何条件，不被允许执行删除操作');
                 return false;
             }
         }
-        $sqlString = 'DELETE'.$table.' FROM '.$table_name.self::$joinString.self::$whereString.self::$orderString.self::$limitString;
-        $res = self::execute($sqlString);
+        $sqlString = 'DELETE'.$table.' FROM '.$table_name.$this->joinString.$this->whereString.$this->orderString.$this->limitString;
+        $res = $this->execute($sqlString);
         return $res;
     }
 
@@ -955,33 +961,33 @@ class PDOMySQL
     public function query($queryStr, $is_find = false)
     {
         if (!is_string($queryStr)) {
-            self::throw_exception('query查询须传入字符串');
+            $this->throw_exception('query查询须传入字符串');
             return false;
         }
-        if (self::$fetchSql===true) {
-            $buildSql = self::replaceSpecialChar('/\?/', self::$whereValueArray, $queryStr);
-            self::clearSubString();
+        if ($this->fetchSql===true) {
+            $buildSql = $this->replaceSpecialChar('/\?/', $this->whereValueArray, $queryStr);
+            $this->clearSubString();
             return $buildSql;
         }
-        self::$PDOStatement = self::$link->prepare($queryStr);
-        if (count(self::$whereValueArray)>0) {
-            self::$PDOStatement->execute(self::$whereValueArray);
+        $this->PDOStatement = $this->link->prepare($queryStr);
+        if (count($this->whereValueArray)>0) {
+            $this->PDOStatement->execute($this->whereValueArray);
         } else {
-            self::$PDOStatement->execute();
+            $this->PDOStatement->execute();
         }
-        self::$queryStr = self::replaceSpecialChar('/\?/', self::$whereValueArray, $queryStr);
-        self::clearSubString();
-        $haveError = self::haveErrorThrowException();
+        $this->queryStr = $this->replaceSpecialChar('/\?/', $this->whereValueArray, $queryStr);
+        $this->clearSubString();
+        $haveError = $this->haveErrorThrowException();
         if (false===$haveError) {
             return false;
         }
         if ($is_find===true) {
-            $res = self::$PDOStatement->fetch(PDO::FETCH_ASSOC);
+            $res = $this->PDOStatement->fetch(PDO::FETCH_ASSOC);
             if (false===$res) {
                 return null;
             }
         } else {
-            $res = self::$PDOStatement->fetchAll(PDO::FETCH_ASSOC);
+            $res = $this->PDOStatement->fetchAll(PDO::FETCH_ASSOC);
             if (0===count($res)) {
                 return null;
             }
@@ -997,28 +1003,28 @@ class PDOMySQL
     public function execute($execStr)
     {
         if (!is_string($execStr)) {
-            self::throw_exception('execute查询须传入字符串');
+            $this->throw_exception('execute查询须传入字符串');
             return false;
         }
-        if (self::$fetchSql===true) {
-            $buildSql = self::replaceSpecialChar('/\?/', self::$whereValueArray, $execStr);
-            self::clearSubString();
+        if ($this->fetchSql===true) {
+            $buildSql = $this->replaceSpecialChar('/\?/', $this->whereValueArray, $execStr);
+            $this->clearSubString();
             return $buildSql;
         }
-        self::$PDOStatement = self::$link->prepare($execStr);
-        if (count(self::$whereValueArray)>0) {
-            self::$PDOStatement->execute(self::$whereValueArray);
+        $this->PDOStatement = $this->link->prepare($execStr);
+        if (count($this->whereValueArray)>0) {
+            $this->PDOStatement->execute($this->whereValueArray);
         } else {
-            self::$PDOStatement->execute();
+            $this->PDOStatement->execute();
         }
-        self::$queryStr = self::replaceSpecialChar('/\?/', self::$whereValueArray, $execStr);
-        self::clearSubString();
-        $haveError = self::haveErrorThrowException();
+        $this->queryStr = $this->replaceSpecialChar('/\?/', $this->whereValueArray, $execStr);
+        $this->clearSubString();
+        $haveError = $this->haveErrorThrowException();
         if (false===$haveError) {
             return false;
         }
-        self::$numRows = self::$PDOStatement->rowCount();
-        return self::$numRows;
+        $this->numRows = $this->PDOStatement->rowCount();
+        return $this->numRows;
     }
 
     /**
@@ -1026,7 +1032,7 @@ class PDOMySQL
      */
     public function startTrans()
     {
-        $link = self::$link;
+        $link = $this->link;
         $link->beginTransaction();
     }
 
@@ -1036,7 +1042,7 @@ class PDOMySQL
      */
     public function inTrans()
     {
-        return self::$link->inTransaction();
+        return $this->link->inTransaction();
     }
 
     /**
@@ -1044,11 +1050,11 @@ class PDOMySQL
      */
     public function rollback()
     {
-        $link = self::$link;
-        if (self::inTrans()===true) {
+        $link = $this->link;
+        if ($this->inTrans()===true) {
             $link->rollBack();
         } else {
-            self::throw_exception("当前不处于事务中");
+            $this->throw_exception("当前不处于事务中");
         }
     }
 
@@ -1057,11 +1063,11 @@ class PDOMySQL
      */
     public function commit()
     {
-        $link = self::$link;
-        if (self::inTrans()===true) {
+        $link = $this->link;
+        if ($this->inTrans()===true) {
             $link->commit();
         } else {
-            self::throw_exception("当前不处于事务中");
+            $this->throw_exception("当前不处于事务中");
         }
     }
 
@@ -1071,11 +1077,11 @@ class PDOMySQL
      */
     public function getLastSql()
     {
-        if (self::$dbdebug===false) {
-            self::throw_exception('请先开启DEBUG模式');
+        if ($this->dbdebug===false) {
+            $this->throw_exception('请先开启DEBUG模式');
             return false;
         }
-        return self::$queryStr;
+        return $this->queryStr;
     }
 
     /**
@@ -1084,11 +1090,11 @@ class PDOMySQL
      */
     public function _sql()
     {
-        if (self::$dbdebug===false) {
-            self::throw_exception('请先开启DEBUG模式');
+        if ($this->dbdebug===false) {
+            $this->throw_exception('请先开启DEBUG模式');
             return false;
         }
-        return self::$queryStr;
+        return $this->queryStr;
     }
 
     /**
@@ -1097,21 +1103,21 @@ class PDOMySQL
      */
     public function getLastLog()
     {
-        if (self::$dbdebug===false) {
-            self::throw_exception('请先开启DEBUG模式');
+        if ($this->dbdebug===false) {
+            $this->throw_exception('请先开启DEBUG模式');
             return false;
         }
-        if (self::$MySQL_log=='') {
-            self::throw_exception('尚未指定SQL日志文件的路径');
+        if ($this->MySQL_log=='') {
+            $this->throw_exception('尚未指定SQL日志文件的路径');
             return false;
         }
-        $get_file_lastline = self::get_file_lastline(self::$MySQL_log);
+        $get_file_lastline = $this->get_file_lastline($this->MySQL_log);
         if ($get_file_lastline===false) {
             return false;
         } else {
             $is_match=preg_match('/(?<=Query).*/', $get_file_lastline, $match);
             if ($is_match!=1) {
-                self::throw_exception('SQL日志文件最后一行无Query字符串');
+                $this->throw_exception('SQL日志文件最后一行无Query字符串');
                 return false;
             }
             return trim($match[0]);
@@ -1132,14 +1138,14 @@ class PDOMySQL
         $logic = ' AND ';
         $whereSubString = '';
         if (isset($whereArrayParam['_complex'])) {
-            $whereSubString = '( '.self::parseWhereArrayParam($whereArrayParam['_complex']).' )';
+            $whereSubString = '( '.$this->parseWhereArrayParam($whereArrayParam['_complex']).' )';
             unset($whereArrayParam['_complex']);
         }
         if (isset($whereArrayParam['_logic'])) {
-            if (in_array($whereArrayParam['_logic'], self::$SQL_logic)) {
+            if (in_array(strtoupper($whereArrayParam['_logic']), $this->SQL_logic)) {
                 $logic = ' '.strtoupper($whereArrayParam['_logic']).' ';
             } else {
-                self::throw_exception('_logic参数指定的逻辑运算符不被支持："'.$whereArrayParam['_logic'].'"');
+                $this->throw_exception('_logic参数指定的逻辑运算符不被支持："'.$whereArrayParam['_logic'].'"');
                 return false;
             }
             unset($whereArrayParam['_logic']);
@@ -1156,10 +1162,10 @@ class PDOMySQL
                 $explode_array[$explode_sub_query[0]]=$explode_sub_query[1];
             }
             if (isset($explode_array['_logic'])) {
-                if (in_array($explode_array['_logic'], self::$SQL_logic)) {
+                if (in_array(strtoupper($explode_array['_logic']), $this->SQL_logic)) {
                     $sub_logic = ' '.strtoupper($explode_array['_logic']).' ';
                 } else {
-                    self::throw_exception('_query中的_logic参数指定的逻辑运算符不被支持："'.$explode_array['_logic'].'"');
+                    $this->throw_exception('_query中的_logic参数指定的逻辑运算符不被支持："'.$explode_array['_logic'].'"');
                     return false;
                 }
                 unset($explode_array['_logic']);
@@ -1190,7 +1196,7 @@ class PDOMySQL
                     } else {
                         $whereArraySubString .= "`".$key."` = ?";
                     }
-                    self::$whereValueArray[] = $val;
+                    $this->whereValueArray[] = $val;
                 } elseif (($have_and!==false&&$have_or===false)||($have_and===false&&$have_or!==false)) {
                     //有&符号，无|符号 或者 无&符号，有|符号
                     if ($have_and!==false) {
@@ -1209,13 +1215,13 @@ class PDOMySQL
                         } else {
                             $whereArraySubString .= $sub_logic."`".$explode_val."` = ?";
                         }
-                        self::$whereValueArray[] = $val;
+                        $this->whereValueArray[] = $val;
                     }
                     $whereArraySubString = ltrim($whereArraySubString, $sub_logic);
                     $whereArraySubString = '( '.$whereArraySubString.' )';
                 } else {
                     //既有&符号，又有|符号
-                    self::throw_exception('快捷查询方式中“|”和“&”不能同时使用');
+                    $this->throw_exception('快捷查询方式中“|”和“&”不能同时使用');
                     return false;
                 }
             } else {
@@ -1225,11 +1231,11 @@ class PDOMySQL
                     //无&和|符号
                     if (isset($val['_tomulti'])&&$val['_tomulti']===true) {
                         //多条件查询
-                        $get_parseMultiQuery = self::parseMultiQuery($key, $val);
+                        $get_parseMultiQuery = $this->parseMultiQuery($key, $val);
                         $whereArraySubString .= $get_parseMultiQuery;
                     } else {
                         //表达式查询
-                        $get_parseExpQuery = self::parseExpQuery($key, $val);
+                        $get_parseExpQuery = $this->parseExpQuery($key, $val);
                         $whereArraySubString .= $get_parseExpQuery;
                     }
                 } elseif (($have_and!==false&&$have_or===false)||($have_and===false&&$have_or!==false)) {
@@ -1245,7 +1251,7 @@ class PDOMySQL
                     $signal = 3;//1代表字段对应数组元素单条件查询，2代表字段对应数组元素多条件查询，3代表表达式查询
                     if (isset($val['_tosingle'])&&isset($val['_tomulti'])) {
                         if ($val['_tosingle']===true&&$val['_tomulti']===true) {
-                            self::throw_exception('单条件查询和多条件查询不能同时存在');
+                            $this->throw_exception('单条件查询和多条件查询不能同时存在');
                             return false;
                         }
                         if ($val['_tosingle']===true) {
@@ -1272,11 +1278,11 @@ class PDOMySQL
                             if (is_array($val[$index])) {
                                 if (isset($val[$index]['_tomulti'])&&$val[$index]['_tomulti']===true) {
                                     //多条件查询
-                                    $get_parseMultiQuery = self::parseMultiQuery($explode_val, $val[$index]);
+                                    $get_parseMultiQuery = $this->parseMultiQuery($explode_val, $val[$index]);
                                     $whereArraySubString .= $sub_logic.$get_parseMultiQuery;
                                 } else {
                                     //表达式查询
-                                    $get_parseExpQuery = self::parseExpQuery($explode_val, $val[$index]);
+                                    $get_parseExpQuery = $this->parseExpQuery($explode_val, $val[$index]);
                                     $whereArraySubString .= $sub_logic.$get_parseExpQuery;
                                 }
                             } else {
@@ -1286,20 +1292,20 @@ class PDOMySQL
                                 } else {
                                     $whereArraySubString .= $sub_logic."`".$explode_val."` = ?";
                                 }
-                                self::$whereValueArray[] = $val[$index];
+                                $this->whereValueArray[] = $val[$index];
                             }
                             $index++;
                         }
                     } elseif ($signal==2) {
                         //字段对应数组元素多条件查询
                         foreach ($explode_array as $explode_val) {
-                            $get_parseMultiQuery = self::parseMultiQuery($explode_val, $val);
+                            $get_parseMultiQuery = $this->parseMultiQuery($explode_val, $val);
                             $whereArraySubString .= $sub_logic.$get_parseMultiQuery;
                         }
                     } else {
                         //表达式查询
                         foreach ($explode_array as $explode_val) {
-                            $get_parseExpQuery = self::parseExpQuery($explode_val, $val);
+                            $get_parseExpQuery = $this->parseExpQuery($explode_val, $val);
                             $whereArraySubString .= $sub_logic.$get_parseExpQuery;
                         }
                     }
@@ -1307,7 +1313,7 @@ class PDOMySQL
                     $whereArraySubString = '( '.$whereArraySubString.' )';
                 } else {
                     //既有&符号，又有|符号
-                    self::throw_exception('快捷查询方式中“|”和“&”不能同时使用');
+                    $this->throw_exception('快捷查询方式中“|”和“&”不能同时使用');
                     return false;
                 }
             }
@@ -1334,27 +1340,27 @@ class PDOMySQL
         switch (strtoupper($array[0])) {
             case "EQ":
                 $expQueryString .= $column.' = ?';
-                self::$whereValueArray[] = $array[1];
+                $this->whereValueArray[] = $array[1];
                 break;
             case "NEQ":
                 $expQueryString .= $column.' <> ?';
-                self::$whereValueArray[] = $array[1];
+                $this->whereValueArray[] = $array[1];
                 break;
             case "GT":
                 $expQueryString .= $column.' > ?';
-                self::$whereValueArray[] = $array[1];
+                $this->whereValueArray[] = $array[1];
                 break;
             case "EGT":
                 $expQueryString .= $column.' >= ?';
-                self::$whereValueArray[] = $array[1];
+                $this->whereValueArray[] = $array[1];
                 break;
             case "LT":
                 $expQueryString .= $column.' < ?';
-                self::$whereValueArray[] = $array[1];
+                $this->whereValueArray[] = $array[1];
                 break;
             case "ELT":
                 $expQueryString .= $column.' <= ?';
-                self::$whereValueArray[] = $array[1];
+                $this->whereValueArray[] = $array[1];
                 break;
             case "LIKE":
             case "NOTLIKE":
@@ -1367,26 +1373,26 @@ class PDOMySQL
                 if (is_array($array[1])) {
                     $logic = ' AND ';
                     if (isset($array[2])) {
-                        if (in_array($array[2], self::$SQL_logic)) {
+                        if (in_array(strtoupper($array[2]), $this->SQL_logic)) {
                             $logic = ' '.strtoupper($array[2]).' ';
                         } else {
                             if (!is_string($array[2])) {
-                                self::throw_exception('[NOT] LIKE查询中的数组第三个元素必须为字符串，用于指定逻辑运算符');
+                                $this->throw_exception('[NOT] LIKE查询中的数组第三个元素必须为字符串，用于指定逻辑运算符');
                                 return false;
                             }
-                            self::throw_exception('[NOT] LIKE查询中的逻辑运算符"'.$array[2].'"不被支持');
+                            $this->throw_exception('[NOT] LIKE查询中的逻辑运算符"'.$array[2].'"不被支持');
                             return false;
                         }
                     }
                     foreach ($array[1] as $val) {
                         $expQueryString .= $logic.$column.$string.' ?';
-                        self::$whereValueArray[] = (string)$val;
+                        $this->whereValueArray[] = (string)$val;
                     }
                     $expQueryString = ltrim($expQueryString, $logic);
                     $expQueryString = '( '.$expQueryString.' )';
                 } else {
                     $expQueryString .= $column.$string.' ?';
-                    self::$whereValueArray[] = $array[1];
+                    $this->whereValueArray[] = $array[1];
                 }
                 break;
             case "BETWEEN":
@@ -1400,25 +1406,25 @@ class PDOMySQL
                 }
                 $expQueryString .= $column.$string.'? AND ?';
                 if (is_array($array[1])) {
-                    self::$whereValueArray[] = $array[1][0];
-                    self::$whereValueArray[] = $array[1][1];
+                    $this->whereValueArray[] = $array[1][0];
+                    $this->whereValueArray[] = $array[1][1];
                 } elseif (is_string($array[1])) {
                     $explode_array = explode(',', $array[1]);
                     if (count($explode_array)!=2) {
-                        self::throw_exception('表达式查询之[NOT]BETWEEN后的参数错误：'.$array[1]);
+                        $this->throw_exception('表达式查询之[NOT]BETWEEN后的参数错误：'.$array[1]);
                         return false;
                     }
-                    self::$whereValueArray[] = trim($explode_array[0]);
-                    self::$whereValueArray[] = trim($explode_array[1]);
+                    $this->whereValueArray[] = trim($explode_array[0]);
+                    $this->whereValueArray[] = trim($explode_array[1]);
                 } elseif (is_numeric($array[1])) {
                     if (!isset($array[2])||!is_numeric($array[2])) {
-                        self::throw_exception('表达式查询之[NOT]BETWEEN后的参数错误(two number expected)');
+                        $this->throw_exception('表达式查询之[NOT]BETWEEN后的参数错误(two number expected)');
                         return false;
                     }
-                    self::$whereValueArray[] = $array[1];
-                    self::$whereValueArray[] = $array[2];
+                    $this->whereValueArray[] = $array[1];
+                    $this->whereValueArray[] = $array[2];
                 } else {
-                    self::throw_exception('表达式查询之[NOT]BETWEEN后的参数错误：'.$array[1]);
+                    $this->throw_exception('表达式查询之[NOT]BETWEEN后的参数错误：'.$array[1]);
                     return false;
                 }
                 break;
@@ -1434,15 +1440,15 @@ class PDOMySQL
                 if (is_array($array[1])) {
                     $length = count($array[1]);
                     if ($length==0) {
-                        self::throw_exception('表达式查询之[NOT]IN后的数组参数为空：array()');
+                        $this->throw_exception('表达式查询之[NOT]IN后的数组参数为空：array()');
                         return false;
                     }
                     $expQueryString .= $column.$string.'(';
                     $expQueryString .= '?';
-                    self::$whereValueArray[] = $array[1][0];
+                    $this->whereValueArray[] = $array[1][0];
                     for ($i=1; $i<$length; $i++) {
                         $expQueryString .= ',?';
-                        self::$whereValueArray[] = $array[1][$i];
+                        $this->whereValueArray[] = $array[1][$i];
                     }
                     $expQueryString .= ')';
                 } elseif (is_string($array[1])) {
@@ -1450,14 +1456,14 @@ class PDOMySQL
                     $length = count($explode_array);
                     $expQueryString .= $column.$string.'(';
                     $expQueryString .= '?';
-                    self::$whereValueArray[] = $explode_array[0];
+                    $this->whereValueArray[] = $explode_array[0];
                     for ($i=1; $i<$length; $i++) {
                         $expQueryString .= ',?';
-                        self::$whereValueArray[] = $explode_array[$i];
+                        $this->whereValueArray[] = $explode_array[$i];
                     }
                     $expQueryString .= ')';
                 } else {
-                    self::throw_exception('表达式查询之[NOT]IN后的参数错误：'.$array[1]);
+                    $this->throw_exception('表达式查询之[NOT]IN后的参数错误：'.$array[1]);
                     return false;
                 }
                 break;
@@ -1465,12 +1471,12 @@ class PDOMySQL
                 if (is_string($array[1])) {
                     $expQueryString .= $column.$array[1];
                 } else {
-                    self::throw_exception('表达式查询之exp后的参数错误：'.$array[1]);
+                    $this->throw_exception('表达式查询之exp后的参数错误：'.$array[1]);
                     return false;
                 }
                 break;
             default:
-                self::throw_exception('表达式查询之表达式错误："'.$array[0].'"');
+                $this->throw_exception('表达式查询之表达式错误："'.$array[0].'"');
                 return false;
         }
         return $expQueryString;
@@ -1497,7 +1503,7 @@ class PDOMySQL
         }
         $length = count($array);
         $logic = ' AND ';
-        if (is_string($array[$length-1])&&(in_array($array[$length-1], self::$SQL_logic))) {
+        if (is_string($array[$length-1])&&(in_array(strtoupper($array[$length-1]), $this->SQL_logic))) {
             $length--;
             $logic = ' '.strtoupper($array[$length]).' ';
         }
@@ -1505,16 +1511,16 @@ class PDOMySQL
             if (is_array($array[$i])) {
                 if (isset($array[$i]['_tomulti'])&&$array[$i]['_tomulti']===true) {
                     //多条件查询
-                    $get_parseMultiQuery = self::parseMultiQuery($column, $array[$i]);
+                    $get_parseMultiQuery = $this->parseMultiQuery($column, $array[$i]);
                     $multiQueryString .= $logic.$get_parseMultiQuery;
                 } else {
                     //表达式查询
-                    $get_parseExpQuery = self::parseExpQuery($column, $array[$i]);
+                    $get_parseExpQuery = $this->parseExpQuery($column, $array[$i]);
                     $multiQueryString .= $logic.$get_parseExpQuery;
                 }
             } else {
                 $multiQueryString .= $logic.$column.' = ?';
-                self::$whereValueArray[] = $array[$i];
+                $this->whereValueArray[] = $array[$i];
             }
         }
         $multiQueryString = ltrim($multiQueryString, $logic);
@@ -1534,11 +1540,11 @@ class PDOMySQL
             //字符串中有" as "
             $match_number = preg_match('/(?<=as\s{1}).*/i', $value, $match);
             if ($match_number==0||preg_match('/\w+/', $match[0])==0) {
-                self::throw_exception('"'.$value.'"的as关键词后无字符');
+                $this->throw_exception('"'.$value.'"的as关键词后无字符');
                 return false;
             }
             if (preg_match('/\s+/', trim($match[0]))!=0) {
-                self::throw_exception('"'.$value.'"的as关键词后出现两个单词');
+                $this->throw_exception('"'.$value.'"的as关键词后出现两个单词');
                 return false;
             }
             $value=preg_replace('/(?<=as\s{1}).*/i', '`'.trim($match[0]).'`', $value);
@@ -1546,7 +1552,7 @@ class PDOMySQL
         } elseif (1===preg_match('/^\w+\.\w+$/', $value)) {
             //字符串是dbname.tablename
             if (preg_match('/\s/', $value)!=0) {
-                self::throw_exception('"'.$value.'"中间存在非法的空格字符');
+                $this->throw_exception('"'.$value.'"中间存在非法的空格字符');
                 return false;
             }
         } else {
@@ -1570,12 +1576,12 @@ class PDOMySQL
         if (is_array($replacement)) {
             $length = count($replacement);
             for ($i=0; $i<$length; $i++) {
-                $subject = preg_replace($pattern, self::$link->quote($replacement[$i]), $subject, 1);
+                $subject = preg_replace($pattern, $this->link->quote($replacement[$i]), $subject, 1);
             }
         } elseif (is_string($replacement)) {
-            $subject = preg_replace($pattern, self::$link->quote($replacement), $subject);
+            $subject = preg_replace($pattern, $this->link->quote($replacement), $subject);
         } else {
-            self::throw_exception('replaceSpecialChar函数的第二个参数类型错误');
+            $this->throw_exception('replaceSpecialChar函数的第二个参数类型错误');
             return false;
         }
         return $subject;
@@ -1616,18 +1622,18 @@ class PDOMySQL
      */
     private function clearSubString()
     {
-        self::$fieldString='';
-        self::$joinString='';
-        self::$whereString='';
-        self::$groupString='';
-        self::$havingString='';
-        self::$orderString='';
-        self::$limitString='';
-        self::$aliasString='';
-        self::$tmp_table='';
-        self::$fetchSql=false;
-        self::$whereStringArray=array();
-        self::$whereValueArray=array();
+        $this->fieldString='';
+        $this->joinString='';
+        $this->whereString='';
+        $this->groupString='';
+        $this->havingString='';
+        $this->orderString='';
+        $this->limitString='';
+        $this->aliasString='';
+        $this->tmp_table='';
+        $this->fetchSql=false;
+        $this->whereStringArray=array();
+        $this->whereValueArray=array();
     }
 
     /**
@@ -1635,16 +1641,16 @@ class PDOMySQL
      */
     public function haveErrorThrowException()
     {
-        $obj=empty(self::$PDOStatement)?self::$link: self::$PDOStatement;
+        $obj=empty($this->PDOStatement)?$this->link: $this->PDOStatement;
         $arrError=$obj->errorInfo();
         //print_r($arrError);
         if ($arrError[0]!='00000') {
-            self::$error='SQLSTATE: '.$arrError[0].' <br/>SQL Error: <div>'.$arrError[2].'</div><br/>Error SQL: <div>'.self::$queryStr.'</div>';
-            self::throw_exception(self::$error);
+            $this->error='SQLSTATE: '.$arrError[0].' <br/>SQL Error: <div>'.$arrError[2].'</div><br/>Error SQL: <div>'.$this->queryStr.'</div>';
+            $this->throw_exception($this->error);
             return false;
         }
-        if (self::$queryStr=='') {
-            self::throw_exception('没有执行SQL语句');
+        if ($this->queryStr=='') {
+            $this->throw_exception('没有执行SQL语句');
             return false;
         }
         return true;
@@ -1654,11 +1660,11 @@ class PDOMySQL
      * 自定义错误处理
      * @param unknown $errMsg
      */
-    public static function throw_exception($errMsg)
+    public function throw_exception($errMsg)
     {
         $bt = debug_backtrace();
         $caller = array_shift($bt);
-        if (self::$dbdebug) {
+        if ($this->dbdebug) {
             $errMsg .= '</b><br/><br/><b>错误位置</b><br>FILE: '.$caller['file'].'   LINE: '.$caller['line'];
             $caller = array_shift($bt);
             $number = 0;
@@ -1685,7 +1691,7 @@ class PDOMySQL
      */
     public function getTableName()
     {
-        return self::$table;
+        return $this->table;
     }
 
     /**
@@ -1694,8 +1700,8 @@ class PDOMySQL
      */
     public function getColumns()
     {
-        self::set_columns(self::$table);
-        return self::$columns;
+        $this->set_columns($this->table);
+        return $this->columns;
     }
 
     /**
@@ -1704,7 +1710,7 @@ class PDOMySQL
      */
     public function getDbVersion()
     {
-        return self::$dbVersion;
+        return $this->dbVersion;
     }
 
     /**
@@ -1713,15 +1719,15 @@ class PDOMySQL
      */
     public function getNumRows()
     {
-        return self::$numRows;
+        return $this->numRows;
     }
 
     /**
      * 销毁连接对象，关闭数据库
      */
-    public static function close()
+    public function close()
     {
-        self::$link=null;
+        $this->link=null;
     }
 
     /**
@@ -1729,7 +1735,7 @@ class PDOMySQL
      */
     public function __destruct()
     {
-        self::close();
+        $this->close();
     }
 }
 //M函数
