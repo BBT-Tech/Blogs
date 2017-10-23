@@ -17,6 +17,8 @@ class PDOMySQL
     private $numRows=0;//上一步操作产生受影响的记录的条数
     private $MySQL_log='';//MySQL的日志文件路径
 
+    private $tmp_table='';
+    private $aliasString='';
     private $fieldString='';
     private $joinString='';
     private $whereString='';
@@ -24,8 +26,6 @@ class PDOMySQL
     private $havingString='';
     private $orderString='';
     private $limitString='';
-    private $aliasString='';
-    private $tmp_table='';
     private $fetchSql=false;
 
     private $whereStringArray=array();
@@ -348,7 +348,7 @@ class PDOMySQL
             return false;
         }
         if (is_string($order)) {
-            $this->orderString = ' ORDER BY '.$oreder;
+            $this->orderString = ' ORDER BY '.$order;
         }
         if (is_array($order)) {
             $this->orderString = ' ORDER BY ';
@@ -501,8 +501,16 @@ class PDOMySQL
     {
         $this->fieldString = ' COUNT('.$field.') AS f_count';
         $this->limitString = ' LIMIT 1';
+        $is_fetchSql=false;
+        if ($this->fetchSql==true) {
+            $is_fetchSql=true;
+        }
         $res = $this->select();
-        return $res[0]['f_count'];
+        if ($is_fetchSql) {
+            return $res;
+        } else {
+            return $res[0]['f_count'];
+        }
     }
 
     /**
@@ -515,8 +523,16 @@ class PDOMySQL
     {
         $this->fieldString = ' MAX('.$field.') AS f_max';
         $this->limitString = ' LIMIT 1';
+        $is_fetchSql=false;
+        if ($this->fetchSql==true) {
+            $is_fetchSql=true;
+        }
         $res = $this->select();
-        return $res[0]['f_max'];
+        if ($is_fetchSql) {
+            return $res;
+        } else {
+            return $res[0]['f_max'];
+        }
     }
 
     /**
@@ -529,8 +545,16 @@ class PDOMySQL
     {
         $this->fieldString = ' MIN('.$field.') AS f_min';
         $this->limitString = ' LIMIT 1';
+        $is_fetchSql=false;
+        if ($this->fetchSql==true) {
+            $is_fetchSql=true;
+        }
         $res = $this->select();
-        return $res[0]['f_min'];
+        if ($is_fetchSql) {
+            return $res;
+        } else {
+            return $res[0]['f_min'];
+        }
     }
 
     /**
@@ -543,8 +567,16 @@ class PDOMySQL
     {
         $this->fieldString = ' AVG('.$field.') AS f_avg';
         $this->limitString = ' LIMIT 1';
+        $is_fetchSql=false;
+        if ($this->fetchSql==true) {
+            $is_fetchSql=true;
+        }
         $res = $this->select();
-        return $res[0]['f_avg'];
+        if ($is_fetchSql) {
+            return $res;
+        } else {
+            return $res[0]['f_avg'];
+        }
     }
 
     /**
@@ -556,8 +588,16 @@ class PDOMySQL
     {
         $this->fieldString = ' SUM('.$field.') AS f_sum';
         $this->limitString = ' LIMIT 1';
+        $is_fetchSql=false;
+        if ($this->fetchSql==true) {
+            $is_fetchSql=true;
+        }
         $res = $this->select();
-        return $res[0]['f_sum'];
+        if ($is_fetchSql) {
+            return $res;
+        } else {
+            return $res[0]['f_sum'];
+        }
     }
 
     /**
@@ -575,7 +615,7 @@ class PDOMySQL
         }
         $this->fieldString = $this->fieldString=='' ? ' *' : $this->fieldString;
         $this->parseWhere();
-        $sqlString .= 'SELECT'.$this->fieldString.' FROM '.$table_name.$this->joinString.$this->whereString.$this->groupString.$this->havingString.$this->orderString.$this->groupString.$this->limitString;
+        $sqlString .= 'SELECT'.$this->fieldString.' FROM '.$table_name.$this->joinString.$this->whereString.$this->groupString.$this->havingString.$this->orderString.$this->limitString;
         $buildSql = $this->replaceSpecialChar('/\?/', $this->whereValueArray, $sqlString);
         $this->clearSubString();
         return '( '.$buildSql.' )';
@@ -602,7 +642,7 @@ class PDOMySQL
         $this->limitString = ' LIMIT 1';
         $this->fieldString = $this->fieldString=='' ? ' *' : $this->fieldString;
         $this->parseWhere();
-        $sqlString .= 'SELECT'.$this->fieldString.' FROM '.$table_name.$this->joinString.$this->whereString.$this->groupString.$this->havingString.$this->orderString.$this->groupString.$this->limitString;
+        $sqlString .= 'SELECT'.$this->fieldString.' FROM '.$table_name.$this->joinString.$this->whereString.$this->groupString.$this->havingString.$this->orderString.$this->limitString;
         $res = $this->query($sqlString, true);
         return $res;
     }
@@ -622,7 +662,7 @@ class PDOMySQL
         }
         $this->fieldString = $this->fieldString=='' ? ' *' : $this->fieldString;
         $this->parseWhere();
-        $sqlString .= 'SELECT'.$this->fieldString.' FROM '.$table_name.$this->joinString.$this->whereString.$this->groupString.$this->havingString.$this->orderString.$this->groupString.$this->limitString;
+        $sqlString .= 'SELECT'.$this->fieldString.' FROM '.$table_name.$this->joinString.$this->whereString.$this->groupString.$this->havingString.$this->orderString.$this->limitString;
         if (false===$query) {
             $this->fetchSql = true;
         }
@@ -667,7 +707,9 @@ class PDOMySQL
         }
         $sqlString = 'INSERT INTO '.$table_name.' ('.$field_str.') VALUES ('.$placeholder.')';
         $res = $this->execute($sqlString);
-        if(is_string($res))return $res;
+        if (is_string($res)) {
+            return $res;
+        }
         $res = $this->link->lastInsertId();
         return $res;
     }
@@ -737,7 +779,9 @@ class PDOMySQL
         }
         $sqlString = 'INSERT INTO '.$table_name.' ('.$field_str.') VALUES '.$valueListStr;
         $res = $this->execute($sqlString);
-        if(is_string($res))return $res;
+        if (is_string($res)) {
+            return $res;
+        }
         $res = $this->link->lastInsertId();
         return $res;
     }
@@ -820,7 +864,7 @@ class PDOMySQL
             $this->throw_exception('setField子句传入的参数类型错误：'.$field[0]);
             return false;
         }
-        $this->whereValueArray = array_merge($updateValueArray,$this->whereValueArray);
+        $this->whereValueArray = array_merge($updateValueArray, $this->whereValueArray);
         if ($this->tmp_table != '') {
             $table_name = $this->tmp_table.$this->aliasString;
         } else {
@@ -913,7 +957,7 @@ class PDOMySQL
             }
         }
         $setFieldStr = rtrim($setFieldStr, ',');
-        $this->whereValueArray = array_merge($updateValueArray,$this->whereValueArray);
+        $this->whereValueArray = array_merge($updateValueArray, $this->whereValueArray);
         if ($this->tmp_table != '') {
             $table_name = $this->tmp_table.$this->aliasString;
         } else {
@@ -1334,7 +1378,8 @@ class PDOMySQL
     {
         $expQueryString = '';
         $start = strpos($column, '.');
-        if ($start===false) {
+        $specialChar_index = strpos($column, '`');
+        if ($specialChar_index===false&&$start===false) {
             $column = '`'.$column.'`';
         }
         switch (strtoupper($array[0])) {
@@ -1493,7 +1538,8 @@ class PDOMySQL
     {
         $multiQueryString = '';
         $start = strpos($column, '.');
-        if ($start===false) {
+        $specialChar_index = strpos($column, '`');
+        if ($specialChar_index===false&&$start===false) {
             $column = '`'.$column.'`';
         }
         foreach ($array as $key => $val) {
