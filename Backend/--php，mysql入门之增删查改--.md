@@ -78,8 +78,8 @@ CREATE TABLE `task`.`task` (
 下面的区别提供给兴趣使然的同学：
 
  1. `Content-Type`仅在取值为`application/x-www-data-urlencoded`和`multipart/form-data`两种情况下，PHP才会将http请求数据包中相应的数据填入全局变量`$_POST`
- 2. 只有`Content-Type`为`multipart/form-data`的时候，PHP不会将http请求数据包中的相应数据填入`php://input`和`$HTTP_RAW_POST_DATA`，否则其它情况都会。填入的长度，由`Coentent-Length`指定。
- 3. PHP不能识别的Content-Type类型的时候，会将http请求包中相应的数据填入变量`$HTTP_RAW_POST_DATA`
+ 2. 只有`Content-Type`为`multipart/form-data`的时候，PHP不会将http请求数据包中的相应数据填入`php://input`和`$HTTP_RAW_POST_DATA`，否则其它情况都会。填入的长度，由`Content-Length`指定。
+ 3. PHP不能识别的`Content-Type`类型的时候，会将http请求包中相应的数据填入变量`$HTTP_RAW_POST_DATA`
 
 总之，这次可以使用`$_POST`数组获取数据。
  
@@ -102,7 +102,7 @@ function output($status, $msg){
 > 永远不要相信前端传来的数据
 
 所以，在数据处理这一步中，有一件必须要做的事情：检验数据。
-如下，我们可以这样检验数据：对于前端传来的三个值`$_POST['ins']`，`$_POST['userName']`，`$_POST['password']`，用`isset()`检验一下是否存在。根据任务文档，`$_POST['ins']`要么是"sign"要么是"login"，如果是其它的值，数据就不规范。
+如下，我们可以这样检验数据：对于前端传来的三个值`$_POST['ins']`，`$_POST['userName']`，`$_POST['password']`，用`isset()`检验一下是否存在。根据任务文档，`$_POST['ins']`要么是“sign”要么是“login”，如果是其它的值，数据就不规范。
 `isset()`是php自带的函数，可能用来检验参数是否存在。`isset($_POST['ins'])`就是检验`$_POST['ins']`是否存在，如果存在函数会返回TRUE，不存在返回FALSE。
 我们可以调用上面的`output()`函数向前端发送信息。当值不存在或者不规范的时候，可以`output(0,'XXX为空')`，或者`output(0,'XXX不规范')`。
 注意，`$_POST['XXX']`中的引号可有可没有，所以也可以写成`$_POST[XXX]`
@@ -172,7 +172,7 @@ function connect_init(){
 当sql语句是查询语句时（如SELECT、SHOW、DESCRIBE 或 EXPLAIN），`mysqli_query()`函数将返回查询后的结果集，当不是查询语句时，返回TRUE或FALSE表示sql语句的是否成功执行。这里我们的sql语句是INSERT插入语句，所以会返回TRUE或FALSE。
 
 所以我们的增加操作的代码可以写成这样：
-注意，我们这里只设置了**name**，**password**，**times**的值，因为**id**的值在插入记录时会自动分配（有autoincrease属性），**last_time**的值会在记录修改时自动分配当前时间（有ON UPDATE CURRENT_TIMESTAMP属性），其实**time**的值默认为0，也可以不设置，具体可查看上面建立数据库表的操作。
+注意，我们这里只设置了**name**，**password**，**times**的值，因为**id**的值在插入记录时会自动分配（有autoincrease属性），**last_time**的值有其默认值，其实我们也设置了**time**的值默认为0，也可以不设置，具体可查看上面建立数据库表的操作。
 
 **代码：**
 ```php
@@ -206,14 +206,14 @@ if (mysqli_query($con, $sql_str)) output(1,'删除成功');
 通常我们喜欢把整条记录查询出来，所以可以这样写：`SELECT * FROM 表名 WHERE 字段3 = 值1 and 字段4 = 值2`
 这句sql语句的意思是从XX表中查询 字段3为值1并且字段4为值2 的记录。
 
-因为我们书写的是查询的sql语句，所以`mysqli_query()`会返回一个查询的结果集。我们需要求查询的结果集进行处理，提取出我们想要的数据。
+因为我们书写的是查询的sql语句，所以`mysqli_query()`会返回一个查询的结果集。我们需要对查询的结果集进行处理，提取出我们想要的数据。
 我们可以使用`mysqli_fetch_array()`函数提取，第一个参数是你要提取的结果集，第二个参数是提取出来的数据 的保存方式。第二个参数可以选择`MYSQLI_ASSOC`，`MYSQLI_NUM`，`MYSQLI_BOTH`的其中一个填入。
 
  - `MYSQLI_ASSOC`：以关联数组的方式保存。
  - `MYSQLI_NUM`：以数字数组的方式保存。
  - `MYSQLI_BOTH`：同时以上面两种方式保存。
 
-假设结果集中有且只有一条记录，记录第一个是**name**，我们用`mysqli_fetch_array()`提取数据并且保存在`$arrays`中。
+假设结果集中有且只有一条记录，记录的第一个字段是**name**，我们用`mysqli_fetch_array()`提取数据并且保存在`$arrays`中。
 
  - 当以关联数组保存的时候，**name**的值**只**存放在`$arrays[name]`中
  - 当以数字数组保存的时候，因为记录中第一个是**name**，**name**的值**只**存放在`$arrays[0]`中
@@ -234,7 +234,7 @@ if (mysqli_num_rows($result) != 0) {
 ---
 
 ####**改**
-继续刚才“查询”中的背景，我们已经完成了“用户登陆时查询出用户并把用户登陆次数+1”的需求，但是我们还要把“+1后的用户登陆次数放回数据库中”，换句话说，就是我们要修改数据库中的用户登陆次数**times**。
+继续刚才“查询”中的背景，我们已经完成了“用户登陆时查询出用户并把用户登陆次数+1”的需求，但是我们还要把“+1后的用户登陆次数放回数据库中”，换句话说，就是我们要修改数据库中的用户登陆次数**times**。因为last_time字段设置了ON UPDATE CURRENT_TIMESTAMP属性，它会在修改记录的时候自动更新为当前时间。
 
 首先我们需要书写sql语句，修改语句是：`UPDATE 表名 SET 字段1 = 值1 WHERE 字段2 = 值2`
 这句sql语句的意思是从XX表中找到 字段2为值2的记录 修改其中的字段1为值1。
@@ -250,9 +250,9 @@ if (mysqli_query($con, $sql_str)) ;
 ###**小结**
 
  - 获取前端发来的数据：因为前端使用POST方式传递数据，可以从`$_POST`数组处获取。
- - 处理前端发来的数据：通常我们需要用`isset()`检验数据是否存在，数据是否规范。
+ - 处理前端发来的数据：通常我们需要用`isset()`检验数据是否存在，然后检验数据是否规范。
  - 链接数据库：使用`mysqli_connect()`建立链接。只有建立链接后才可操作数据库。
- - 运用mysqli增删查改基本操作：书写相应的sql语句，并且用`mysqli_query()`执行，如果是查询语句，使用`mysqli_fetch_array()`提取结果集中的数据，如果不是则会返回TRUE或FALSE。
+ - 运用mysqli增删查改：书写相应的sql语句，并且用`mysqli_query()`执行，如果是查询语句，使用`mysqli_fetch_array()`提取结果集中的数据，如果不是则会返回TRUE或FALSE。
 
 ---
 
