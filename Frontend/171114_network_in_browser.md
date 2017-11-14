@@ -354,13 +354,13 @@ Session 其实就是一个特殊的 Cookie，但其在 Cookie 中储存的是一
 
 对 HTTP/HTTPS 协议请求抓包的软件，除了可以调试浏览器，也可以调试其他的 App。是对整个系统全局抓包的工具。
 
-![Fiddler](/content/images/2017/11/Fiddler.png)
+![Fiddler](https://delbertbeta.cc/content/images/2017/11/Fiddler.png)
 
 ## Postman
 
 Postman可以用来模拟发送 HTTP 请求，用于测试接口。Postman 不需要单独下载安装，是个Chrome App，直接在 Chrome 商店下载即可，如果下载困难，其实这类软件的替代品有很多，比如 [Apizza](http://apizza.cc/)
 
-![Postman](/content/images/2017/11/Postman.png)
+![Postman](https://delbertbeta.cc/content/images/2017/11/Postman.png)
 
 # 设计一个 Web 程序请求接口
 
@@ -401,6 +401,9 @@ Postman可以用来模拟发送 HTTP 请求，用于测试接口。Postman 不�
 
 大家可以参考，并找到自己喜欢的文档风格进行学习模仿。
 
-Delbertbeta
+
+
+
+[Delbertbeta](https://delbertbeta.cc)
 
 2017-11-14 22:08
