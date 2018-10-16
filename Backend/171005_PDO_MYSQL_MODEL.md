@@ -28,6 +28,13 @@
  - field方法支持获取全部字段和字段过滤
  - 优化和解决了一两个小bug
 
+### 2017.10.10更新
+ - 修复BUG
+ - 解决使用count()等统计函数时使用fetchSql(true)出现问题的BUG
+
+### 2017.10.23更新
+ - 修复表达式查询和多条件查询情况下无限加反引号的Bug
+ - 增加 TO DO list （其实是BUG清单，先挖好坑）
 
 ## 使用文档
 注：可结合ThinkPHP3.2.3的文档参考使用。
@@ -368,6 +375,9 @@ Ajax方式返回数据到客户端
 
 其中，当且仅当DEBUG模式开启，以上方法才生效。注意，使用`getLastLog()`须开启MySQL的通用查询日志以及指定MySQL通用日志目录（见[开启MySQL通用查询日志](#general_log)）。
 
+## TO DO list
+ - 事务暂时不支持跨模型操作
+ - field之字段过滤目前仅支持单表查询
 
 ## Github永久更新地址
 [frankie-huang/PDO_MYSQL_MODEL][2]
