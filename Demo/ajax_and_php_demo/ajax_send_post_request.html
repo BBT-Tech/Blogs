@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<body>
+<h2>ajax发送POST请求(带参数), PHP通过$_POST获取数据, 并返回JSON字符串, JS获取字符串并转化为数组</h2>
+
+<button type="button" onclick="send_post()">发送ajax请求(带用户名和密码)</button>
+<p id="show_data"></p>
+<p id="show_array"></p>
+<script>
+function send_post() {
+  var xhttp = new XMLHttpRequest();
+  xhttp.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+      // 直接打印数据
+      document.getElementById("show_data").innerHTML = "php返回的json字符串: " + this.responseText;
+
+      // 将字符串转为数组,并打印
+      var arr = JSON.parse(this.responseText);
+      document.getElementById("show_array").innerHTML = "解析后数组: <br/>";
+      for(var k in arr){
+        document.getElementById("show_array").innerHTML += k + " : " + arr[k] + "<br/>";
+      }
+    }
+  };
+  xhttp.open("POST", "php_get_post_arguments.php", true);
+  xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+  xhttp.send("username=XS&password=NB");
+}
+</script>
+<HR SIZE=2>
+
+<h2>ajax发送post请求(带json数据), PHP获取字符串并转化为php数组,返回json字符串</h2>
+
+<button type="button" onclick="send_post_with_json()">ajax发送post请求(带json数据)</button>
+<p id="demo2"></p>
+<script>
+function send_post_with_json() {
+  var xhttp = new XMLHttpRequest();
+  xhttp.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+      document.getElementById("demo2").innerHTML = "php返回的json字符串: " + this.responseText;
+    }
+  };
+  xhttp.open("POST", "php_get_json.php");
+  xhttp.setRequestHeader("Content-Type", "application/json");
+  var dict = {username:"xs", password:"xs_pwd"};
+  // JSON.stringify是将js数组(或者说js字典更加准确)转为json字符串
+  xhttp.send(JSON.stringify(dict));
+}
+</script>
+</body>
+</html>
